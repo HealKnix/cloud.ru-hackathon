@@ -1,5 +1,9 @@
+import { useAgentStateStore } from '@/entities/agent/model/shared-state.store';
 import { useChatStore } from '@/entities/chat/model/chat.store';
-import { type SendMessagePayload } from '@/entities/chat/types';
+import {
+  type ChatStreamEvent,
+  type SendMessagePayload,
+} from '@/entities/chat/types';
 import { useMcpStore } from '@/entities/mcp/model/mcp.store';
 import { streamChat } from '@/shared/api/chat';
 import { createId } from '@/shared/lib/id';
@@ -13,12 +17,17 @@ export function useChatController() {
   const setStreaming = useChatStore((state) => state.setStreaming);
   const streaming = useChatStore((state) => state.isStreaming);
   const servers = useMcpStore((state) => state.servers);
+  const mergeAgentState = useAgentStateStore((state) => state.mergeState);
   const enabledServers = useMemo(
     () => servers.filter((s) => s.enabled),
     [servers],
   );
 
-  const mutation = useMutation({
+  const mutation = useMutation<
+    AsyncGenerator<ChatStreamEvent, void, unknown>,
+    Error,
+    SendMessagePayload
+  >({
     mutationFn: async (payload: SendMessagePayload) => streamChat(payload),
   });
 
@@ -58,7 +67,13 @@ export function useChatController() {
           serverIds,
         });
         for await (const chunk of generator) {
-          appendToMessage(assistantMessageId, chunk);
+          if (chunk.type === 'done') {
+            break;
+          } else if (chunk.type === 'text') {
+            appendToMessage(assistantMessageId, chunk.delta);
+          } else if (chunk.type === 'state') {
+            mergeAgentState(chunk.state);
+          }
         }
         updateMessage(assistantMessageId, { status: 'done' });
       } catch (error) {
@@ -76,6 +91,7 @@ export function useChatController() {
       appendToMessage,
       enabledServers,
       mutation,
+      mergeAgentState,
       setStreaming,
       updateMessage,
     ],

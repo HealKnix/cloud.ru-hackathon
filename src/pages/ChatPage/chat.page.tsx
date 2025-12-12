@@ -1,3 +1,4 @@
+import { useAgentStateStore } from '@/entities/agent/model/shared-state.store';
 import { useChatStore } from '@/entities/chat/model/chat.store';
 import { useChatController } from '@/features/chat-send/model/use-chat-controller';
 import { ChatInput } from '@/features/chat-send/ui/chat-input';
@@ -24,6 +25,7 @@ export function ChatPage() {
   const { sendMessage, isStreaming } = useChatController();
   const clearMessages = useChatStore((state) => state.clearMessages);
   const messages = useChatStore((state) => state.messages);
+  const resetAgentState = useAgentStateStore((state) => state.resetState);
   useMcpServers();
 
   const chatThreadWrapper = useRef<HTMLDivElement | null>(null);
@@ -41,6 +43,11 @@ export function ChatPage() {
     if (lastUserMessage) {
       sendMessage(lastUserMessage.content);
     }
+  };
+
+  const handleClearChat = () => {
+    clearMessages();
+    resetAgentState();
   };
 
   useEffect(() => {
@@ -124,9 +131,9 @@ export function ChatPage() {
 
           <div className="hidden flex-col gap-3 overflow-auto pt-3 lg:flex">
             <ChatToolbar
-              onClear={clearMessages}
+              onClear={handleClearChat}
               onNewChat={() => {
-                clearMessages();
+                handleClearChat();
                 setDraft('');
               }}
             />

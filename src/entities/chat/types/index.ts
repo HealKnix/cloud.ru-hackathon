@@ -28,3 +28,9 @@ export type SendMessagePayload = {
   serverIds: string[];
   tool?: string;
 };
+
+export type ChatStreamEvent =
+  | { type: 'text'; delta: string }
+  | { type: 'state'; state: Record<string, unknown> }
+  | { type: 'done' }
+  | { type: 'unknown'; raw: unknown };
