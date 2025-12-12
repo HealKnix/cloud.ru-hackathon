@@ -1,0 +1,5 @@
+'*.{webmanifest,json,yml}':
+  - npm run prettier
+'*.{ts,tsx,js,jsx,css,scss}':
+  - npm run prettier
+  - npm run eslint
