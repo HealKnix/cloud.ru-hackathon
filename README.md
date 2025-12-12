@@ -1,73 +1,92 @@
-# React + TypeScript + Vite
+# Агент 1С — веб‑интерфейс
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Фронтенд для чата с агентом (LLM/agent backend), с поддержкой подключения MCP‑серверов (инструментов), стриминга ответа и быстрых подсказок/истории.
 
-Currently, two official plugins are available:
+## Возможности
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Чат с агентом со стримингом ответа (AG‑UI поток).
+- Переключение MCP‑серверов и выбор доступных инструментов.
+- Автокомплит инструментов по `/` в поле ввода.
+- Быстрые промпты и история диалогов (через API или мок‑режим).
+- Светлая/тёмная тема, рендер Markdown (GFM + KaTeX).
 
-## React Compiler
+## Стек
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 19 + TypeScript
+- Vite
+- React Router
+- TanStack Query (react-query)
+- Zustand (локальные сторы)
+- Tailwind CSS + shadcn/ui (Radix primitives), Vaul (Drawer)
+- Axios (REST) + `fetch` для стриминга
+- ESLint + Prettier + Husky + lint-staged
 
-## Expanding the ESLint configuration
+## Быстрый старт
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Рекомендуемый менеджер пакетов — `pnpm` (в репозитории есть `pnpm-lock.yaml`).
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+pnpm i
+cp example.env .env
+pnpm dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Dev‑сервер стартует на `http://localhost:3000` (см. `vite.config.ts`).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x';
-import reactDom from 'eslint-plugin-react-dom';
+### Мок‑режим (без бэкенда)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```bash
+pnpm dev:mock
 ```
+
+В этом режиме Vite подхватит `.env.mock`, а запросы истории/подсказок/MCP и стриминг ответа будут обслуживаться моками из `src/shared/api/mock`.
+
+## Переменные окружения (.env)
+
+Проект использует Vite‑переменные — нужен префикс `VITE_`.
+
+- `VITE_API_URL` — базовый URL REST API. Используется для:
+  - `GET /chat/prompts` — быстрые промпты
+  - `GET /chat/history` — история диалогов
+  - `GET /mcp/servers` — список MCP‑серверов
+  - `POST /mcp/servers/:id/state` — сохранить состояние сервера
+- `VITE_AGUI_URL` (опционально) — endpoint AG‑UI для стриминга ответа. Если не задан, используется `${VITE_API_URL}/agui`.
+- `VITE_API_MOCK` — `true/false`, включает моки (см. также `pnpm dev:mock`).
+
+### Как работать с `example.env`
+
+1. Скопируйте `example.env` в `.env`.
+2. При необходимости поменяйте `VITE_API_URL` (и/или `VITE_AGUI_URL`).
+3. Для локальной разработки без бэкенда используйте `pnpm dev:mock` или установите `VITE_API_MOCK=true`.
+
+> Файл `.env` игнорируется git’ом (см. `.gitignore`).
+
+## Архитектура и структура папок
+
+Структура близка к Feature-Sliced Design (FSD): `app / pages / widgets / features / entities / shared`.
+
+```
+public/                # статические файлы (лого и т.п.)
+src/
+  app/                 # инициализация приложения: роутер, провайдеры
+  pages/               # страницы (сейчас: ChatPage)
+  widgets/             # крупные UI-блоки (thread/toolbar/history)
+  features/            # пользовательские фичи (отправка, MCP, автокомплит)
+  entities/            # доменные сущности и сторы (chat, mcp, agent state)
+  shared/              # переиспользуемое: api, ui-kit, lib, hooks, components
+```
+
+Ключевые места:
+
+- `src/app/router.tsx` — маршрутизация (сейчас один маршрут `/`).
+- `src/app/providers/app-providers.tsx` — провайдеры (React Query, тема).
+- `src/shared/api/*` — клиенты API и стриминг AG‑UI.
+- `src/shared/api/mock/*` — моки для режима `VITE_API_MOCK=true`.
+
+## Скрипты
+
+- `pnpm dev` — локальная разработка
+- `pnpm dev:mock` — разработка с мок‑данными
+- `pnpm build` — сборка в `dist/`
+- `pnpm preview` — предпросмотр сборки
+- `pnpm lint` — форматирование + eslint + typecheck
