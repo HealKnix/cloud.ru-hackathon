@@ -1,0 +1,13 @@
+services:
+  mcp:
+    build: .
+    container_name: find-path-mcp
+    ports:
+      - '${PORT:-8000}:8000'
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+      # Windows 1C binary can't be executed inside this Linux image; run server on Windows
+      # instead of relying on the mounted .exe, or switch to a Windows-based container build.
+      - /c/Program Files/1cv8/8.3.27.1786/bin:/onec:ro

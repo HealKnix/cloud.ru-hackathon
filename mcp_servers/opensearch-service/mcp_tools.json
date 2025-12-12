@@ -1,0 +1,66 @@
+[
+  {
+    "name": "upload_document",
+    "description": "Загрузить и проиндексировать документ в OpenSearch (семантические чанки + embeddings через Cloud.ru).",
+    "input": {
+      "content": {
+        "type": "string",
+        "description": "Текст документа для индексации."
+      },
+      "source_name": {
+        "type": "string",
+        "description": "Имя источника документа (например, имя файла)."
+      },
+      "index_name": {
+        "type": "string",
+        "description": "Имя индекса OpenSearch (опционально)."
+      }
+    }
+  },
+  {
+    "name": "search_documents",
+    "description": "Поиск по проиндексированным документам без генерации ответа.",
+    "input": {
+      "query": { "type": "string", "description": "Поисковый запрос." },
+      "index_name": {
+        "type": "string",
+        "description": "Индекс OpenSearch (опционально)."
+      },
+      "max_results": {
+        "type": "integer",
+        "description": "Максимальное число результатов (1-50)."
+      },
+      "use_hyde": {
+        "type": "boolean",
+        "description": "Включить HyDE (опционально)."
+      },
+      "use_colbert": {
+        "type": "boolean",
+        "description": "Включить ColBERT реранкинг (опционально)."
+      }
+    }
+  },
+  {
+    "name": "ask_question",
+    "description": "RAG: поиск + генерация ответа через Cloud.ru (OpenAI-совместимое API).",
+    "input": {
+      "question": { "type": "string", "description": "Вопрос пользователя." },
+      "index_name": {
+        "type": "string",
+        "description": "Индекс OpenSearch (опционально)."
+      },
+      "max_results": {
+        "type": "integer",
+        "description": "Сколько фрагментов использовать для контекста (1-20)."
+      },
+      "use_hyde": {
+        "type": "boolean",
+        "description": "Включить HyDE (опционально)."
+      },
+      "use_colbert": {
+        "type": "boolean",
+        "description": "Включить ColBERT реранкинг (опционально)."
+      }
+    }
+  }
+]

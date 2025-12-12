@@ -1,0 +1,35 @@
+{
+  "name": "1C OData Agent",
+  "description": "ag-ui agent using 1C/OData MCP server and OpenRouter as LLM.",
+  "mcp": {
+    "transport": "streamable-http",
+    "endpoint": "http://localhost:8000/mcp",
+    "tools": ["get_navigation_link", "query_1c_data", "list_odata_entities"]
+  },
+  "llm": {
+    "provider": "openrouter",
+    "base_url": "https://openrouter.ai/api/v1",
+    "model": "z-ai/glm-4.6",
+    "api_key_env": "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",
+    "extra_headers": {
+      "HTTP-Referer": "https://your-app.example.com",
+      "X-Title": "1C-OData-Agent"
+    }
+  },
+  "system_prompt": "Use MCP tools for OData 1C. Get navigation via get_navigation_link, data via query_1c_data, list of entities via list_odata_entities. Don't ask for login/password: they are set in the environment.",
+  "graphs": {
+    "sample_agent": "./simple.py:graph"
+  },
+  "dependencies": [
+    "langchain==1.1.0",
+    "langgraph==1.0.4",
+    "langsmith>=0.4.49",
+    "openai>=1.68.2,<2.0.0",
+    "fastapi>=0.115.5,<1.0.0",
+    "uvicorn>=0.29.0,<1.0.0",
+    "python-dotenv>=1.0.0,<2.0.0",
+    "langgraph-cli[inmem]>=0.4.7",
+    "langchain-openai>=1.1.0",
+    "mcp>=1.0.0"
+  ]
+}

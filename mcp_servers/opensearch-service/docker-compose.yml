@@ -1,0 +1,90 @@
+# ---------------------------------------------------------------------------
+# docker-compose.yml — OpenSearch + MCP-сервер
+# ---------------------------------------------------------------------------
+#
+# Запуск:
+#   docker compose up -d          # запустить в фоне
+#   docker compose logs -f mcp    # смотреть логи MCP
+#   docker compose down           # остановить все
+#
+# ---------------------------------------------------------------------------
+
+services:
+  # --------------------------------------------------------------------------
+  # OpenSearch (один узел, без security для локальной разработки)
+  # --------------------------------------------------------------------------
+  opensearch:
+    image: opensearchproject/opensearch:2.11.1
+    container_name: opensearch
+    environment:
+      - discovery.type=single-node
+      - plugins.security.disabled=true # без TLS/HTTPS для упрощения
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - opensearch_data:/usr/share/opensearch/data
+    ports:
+      - '9200:9200' # REST API
+      - '9600:9600' # Performance Analyzer
+    healthcheck:
+      test: ['CMD-SHELL', 'curl -s http://localhost:9200 >/dev/null || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # --------------------------------------------------------------------------
+  # OpenSearch Dashboards (опционально, можно убрать)
+  # --------------------------------------------------------------------------
+  dashboards:
+    image: opensearchproject/opensearch-dashboards:2.11.1
+    container_name: opensearch-dashboards
+    environment:
+      - OPENSEARCH_HOSTS=["http://opensearch:9200"]
+      - DISABLE_SECURITY_DASHBOARDS_PLUGIN=true
+    ports:
+      - '5601:5601'
+    depends_on:
+      opensearch:
+        condition: service_healthy
+
+  # --------------------------------------------------------------------------
+  # MCP-сервер (FastMCP, stdio transport)
+  # --------------------------------------------------------------------------
+  mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mcp-server
+    environment:
+      # OpenSearch
+      - OPENSEARCH_HOST=opensearch
+      - OPENSEARCH_PORT=9200
+      - OPENSEARCH_USER=
+      - OPENSEARCH_PASSWORD=
+      - OPENSEARCH_USE_SSL=false
+      - OPENSEARCH_INDEX=makar_cloud_semantic
+      # Cloud.ru Foundation Models (задайте ключи или используйте .env файл)
+      - CLOUDRU_API_KEY=${CLOUDRU_API_KEY:-}
+      - API_KEY=${API_KEY:-}
+      - CLOUDRU_BASE_URL=${CLOUDRU_BASE_URL:-https://foundation-models.api.cloud.ru/v1}
+      - CLOUDRU_EMBEDDING_MODEL=${CLOUDRU_EMBEDDING_MODEL:-BAAI/bge-m3}
+      - CLOUDRU_CHAT_MODEL=${CLOUDRU_CHAT_MODEL:-zai-org/GLM-4.6}
+      - CLOUDRU_TEMPERATURE=${CLOUDRU_TEMPERATURE:-0.5}
+      - EMBEDDING_DIM=${EMBEDDING_DIM:-1024}
+    depends_on:
+      opensearch:
+        condition: service_healthy
+    # FastMCP запускается в stdio режиме. Для интеграции с клиентом
+    # используйте docker exec или docker-compose exec.
+    stdin_open: true
+    tty: true
+
+volumes:
+  opensearch_data:
+    driver: local

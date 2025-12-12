@@ -1,0 +1,70 @@
+{
+  "rawEnvs": {
+    "ONEC_BIN_PATH": {
+      "isRequired": false,
+      "description": "Path to 1cv8.exe/1cv8c (set if auto-discovery fails)."
+    },
+    "PORT": {
+      "isRequired": false,
+      "description": "Port for MCP server.",
+      "defaultValue": "8000"
+    },
+    "HOST": {
+      "isRequired": false,
+      "description": "Host for MCP server.",
+      "defaultValue": "0.0.0.0"
+    },
+    "CLOUD_MODEL_ID": {
+      "isRequired": true,
+      "description": "Cloud.ru model id (e.g. glm-4-6)."
+    },
+    "CLOUD_API_URL": {
+      "isRequired": false,
+      "description": "Override Cloud.ru API base URL (default https://foundation-models.api.cloud.ru/v1)."
+    },
+    "ODATA_1C_URL": {
+      "isRequired": true,
+      "description": "Base URL to 1C OData endpoint (without entity part)."
+    },
+    "ODATA_1C_USER": {
+      "isRequired": false,
+      "description": "Default OData username if not passed to the tool."
+    },
+    "LLM_TIMEOUT": {
+      "isRequired": false,
+      "description": "LLM request timeout in seconds.",
+      "defaultValue": "30"
+    },
+    "ODATA_TIMEOUT": {
+      "isRequired": false,
+      "description": "OData request timeout in seconds.",
+      "defaultValue": "20"
+    },
+    "ONEC_CONNECTION_STRING": {
+      "isRequired": false,
+      "description": "Default 1C connection string for metadata cache."
+    },
+    "ONEC_USERNAME": {
+      "isRequired": false,
+      "description": "Designer/Configurator username for metadata cache."
+    },
+    "ONEC_PASSWORD": {
+      "isRequired": false,
+      "description": "Designer/Configurator password for metadata cache."
+    },
+    "E1C_NAV_BASE": {
+      "isRequired": false,
+      "description": "Base prefix for e1c navigation links (e1c://...)."
+    }
+  },
+  "secretEnvs": {
+    "API_KEY": {
+      "isRequired": true,
+      "description": "Cloud.ru API key."
+    },
+    "ODATA_1C_PASSWORD": {
+      "isRequired": false,
+      "description": "Default OData password if not passed to the tool."
+    }
+  }
+}

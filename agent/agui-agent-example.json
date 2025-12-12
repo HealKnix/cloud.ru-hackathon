@@ -1,0 +1,24 @@
+{
+  "name": "1C OData Agent",
+  "description": "Агент ag-ui, использующий MCP-сервер 1С/OData и OpenRouter в качестве LLM.",
+  "mcp": {
+    "odata": {
+      "transport": "streamable-http",
+      "endpoint": "http://localhost:8000/mcp",
+      "tools": ["get_navigation_link", "query_1c_data", "list_odata_entities"]
+    },
+    "opensearch-rag": {
+      "transport": "stdio",
+      "command": "docker",
+      "args": ["exec", "-i", "mcp-server", "python", "/app/mcp_server.py"],
+      "tools": ["upload_document", "ask_question", "search_documents"]
+    }
+  },
+  "llm": {
+    "provider": "cloudru",
+    "base_url": "https://foundation-models.api.cloud.ru/v1",
+    "model": "zai-org/GLM-4.6",
+    "api_key_env": ""
+  },
+  "system_prompt": "Используй MCP инструменты для OData 1С. Навигацию получай через get_navigation_link, данные — через query_1c_data, список сущностей — list_odata_entities. Не спрашивай логин/пароль: они заданы в окружении. Для работы с документами в OpenSearch используй `upload_document` для загрузки, `ask_question` для вопросов к базе знаний (RAG), и `search_documents` для простого поиска."
+}

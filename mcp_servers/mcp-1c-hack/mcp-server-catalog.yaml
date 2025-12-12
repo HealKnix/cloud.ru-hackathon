@@ -1,0 +1,85 @@
+id: 'universal-1c-mcp'
+name: 'Universal 1C MCP'
+description: |
+  MCP сервер для работы с 1С через OData:
+  - поиск объектов конфигурации и построение навигационных ссылок (e1cib)
+  - построение OData-плана через Cloud.ru LLM
+  - выполнение OData-запросов и возврат structured_content
+tools:
+  - name: 'get_navigation_link'
+    description: 'Находит объект конфигурации 1С по имени/синониму и возвращает e1c ссылку.'
+    parameters:
+      query: 'string - имя/синоним объекта'
+      connection_string: 'string - IBConnectionString (опц.)'
+      username: 'string - пользователь 1С Designer (опц.)'
+      password: 'string - пароль 1С Designer (опц.)'
+      force_update: 'boolean - пересоздать кеш'
+  - name: 'query_1c_data'
+    description: 'Строит OData план через LLM и выполняет запрос к 1С OData.'
+    parameters:
+      user_query: 'string - запрос пользователя'
+      connection_string: 'string - IBConnectionString (опц.)'
+      username: 'string - пользователь OData (опц.)'
+      password: 'string - пароль OData (опц.)'
+  - name: 'list_odata_entities'
+    description: 'Возвращает список сущностей из OData ($metadata).'
+    parameters:
+      username: 'string - пользователь OData (опц.)'
+      password: 'string - пароль OData (опц.)'
+rawEnvs:
+  ONEC_BIN_PATH:
+    isRequired: false
+    description: 'Путь к 1cv8.exe/1cv8c (если авто-поиск не сработал).'
+  ONEC_CONNECTION_STRING:
+    isRequired: false
+    description: 'Строка подключения к 1С для кеширования метаданных.'
+  ONEC_USERNAME:
+    isRequired: false
+    description: 'Пользователь 1С Designer (опц.).'
+  ONEC_PASSWORD:
+    isRequired: false
+    description: 'Пароль 1С Designer (опц.).'
+  PORT:
+    isRequired: false
+    description: 'Порт MCP сервера.'
+  HOST:
+    isRequired: false
+    description: 'Хост MCP сервера.'
+  CLOUD_MODEL_ID:
+    isRequired: true
+    description: 'Идентификатор модели Cloud.ru (например, zai-org/GLM-4.6).'
+  CLOUD_API_URL:
+    isRequired: false
+    description: 'Base URL Cloud.ru API (по умолчанию https://foundation-models.api.cloud.ru/v1).'
+  LLM_TIMEOUT:
+    isRequired: false
+    description: 'Тайм-аут LLM запроса (сек).'
+  ODATA_1C_URL:
+    isRequired: true
+    description: 'Base URL OData 1С (без сущности).'
+  ODATA_1C_USER:
+    isRequired: false
+    description: 'Пользователь OData (опц.).'
+  ODATA_TIMEOUT:
+    isRequired: false
+    description: 'Тайм-аут OData запроса (сек).'
+  E1C_NAV_BASE:
+    isRequired: false
+    description: 'Префикс для e1c навигационных ссылок (e1c://...).'
+secretEnvs:
+  API_KEY:
+    isRequired: true
+    description: 'Cloud.ru API key.'
+  ODATA_1C_PASSWORD:
+    isRequired: false
+    description: 'Пароль OData (опц.).'
+image_uri: ${IMAGE_URI:-""}
+license_url: 'https://opensource.org/license/mit/'
+tags: ['1c', 'odata', 'navigation', 'mcp']
+category: 'InternalTools'
+versions: ['0.1.0']
+exposed_ports:
+  - port: 8000
+    protocol: 'HTTP'
+status: 'MCP_SERVER_PREDEFINED_STATUS_AVAILABLE'
+type: 'MCP_SERVER_PREDEFINED_TYPE_INTERNAL'

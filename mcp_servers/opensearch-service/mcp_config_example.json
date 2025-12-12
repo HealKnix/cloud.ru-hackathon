@@ -1,0 +1,21 @@
+{
+  "mcpServers": {
+    "opensearch-rag": {
+      "command": "python",
+      "args": ["/path/to/opensearch-service/server.py"],
+      "env": {
+        "OPENSEARCH_HOST": "localhost",
+        "OPENSEARCH_PORT": "9200",
+        "OPENSEARCH_INDEX": "makar_cloud_semantic",
+        "CLOUDRU_API_KEY": "<your_key>",
+        "CLOUDRU_BASE_URL": "https://foundation-models.api.cloud.ru/v1",
+        "CLOUDRU_EMBEDDING_MODEL": "BAAI/bge-m3",
+        "CLOUDRU_CHAT_MODEL": "zai-org/GLM-4.6",
+        "CLOUDRU_TEMPERATURE": "0.5",
+        "EMBEDDING_DIM": "1024",
+        "SEMANTIC_SIM_THRESHOLD": "0.8",
+        "MAX_SENT_PER_CHUNK": "8"
+      }
+    }
+  }
+}

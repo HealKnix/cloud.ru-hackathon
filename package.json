@@ -4,7 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"npm run dev:ui\" \"npm run dev:agent\" --names ui,agent --prefix-colors blue,green --kill-others",
+    "dev:agent": "uvicorn agent.server:app --reload --reload-dir agent --port 5001",
+    "dev:ui": "vite",
     "dev:mock": "vite --mode mock",
     "build": "tsc -b && vite build",
     "build:mock": "tsc -b && vite build --mode mock",
@@ -14,7 +16,9 @@
     "eslint": "eslint **/*.{tsx,ts,jsx,css,scss} --fix",
     "lint": "npm run prettier && npm run eslint && npm run type-check",
     "lint-staged": "npx lint-staged",
-    "prepare": "husky"
+    "prepare": "husky",
+    "install:agent": "sh ./scripts/setup-agent.sh || scripts\\setup-agent.bat",
+    "postinstall": "npm run install:agent"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.11",
@@ -47,6 +51,7 @@
     "@typescript-eslint/parser": "^8.49.0",
     "@vitejs/plugin-react": "^5.1.1",
     "autoprefixer": "^10.4.22",
+    "concurrently": "^9.2.1",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",

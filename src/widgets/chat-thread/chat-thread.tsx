@@ -40,8 +40,9 @@ export function ChatThread({ onRegenerate }: Props) {
         >
           <div
             className={cn('flex justify-between gap-2 border-b pb-3', {
-              'border-primary/25': message.role === 'assistant',
-              'border-foreground/25': message.role === 'user',
+              'border-primary/35 dark:border-primary/25':
+                message.role === 'assistant',
+              'border-foreground/15': message.role === 'user',
             })}
           >
             <div className="flex gap-2">

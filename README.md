@@ -1,92 +1,125 @@
-# Агент 1С — веб‑интерфейс
+# Агент 1С — UI + Agent + MCP
 
-Фронтенд для чата с агентом (LLM/agent backend), с поддержкой подключения MCP‑серверов (инструментов), стриминга ответа и быстрых подсказок/истории.
+Проект состоит из фронтенда (чат‑интерфейс) и Python‑бэкенда агента, который отдаёт API в стиле **AG‑UI** и умеет вызывать внешние инструменты через **MCP** (1С OData, OpenSearch RAG и др.).
 
-## Возможности
+## Состав проекта
 
-- Чат с агентом со стримингом ответа (AG‑UI поток).
-- Переключение MCP‑серверов и выбор доступных инструментов.
-- Автокомплит инструментов по `/` в поле ввода.
-- Быстрые промпты и история диалогов (через API или мок‑режим).
-- Светлая/тёмная тема, рендер Markdown (GFM + KaTeX).
+- `src/` — фронтенд (React + Vite): чат, стриминг ответа, выбор MCP‑серверов, автокомплит инструментов по `/`.
+- `agent/` — бэкенд агента (FastAPI + LangGraph/LangChain): `POST /api/agui` (SSE/JSON) + API для списка MCP‑серверов.
+- `mcp_servers/` — отдельные MCP‑серверы:
+  - `mcp-1c-hack/` — MCP для 1С через OData (transport: `streamable-http`).
+  - `opensearch-service/` — OpenSearch + MCP RAG (по умолчанию transport: `stdio`, запуск в Docker).
 
-## Стек
+## Как это работает
 
-- React 19 + TypeScript
-- Vite
-- React Router
-- TanStack Query (react-query)
-- Zustand (локальные сторы)
-- Tailwind CSS + shadcn/ui (Radix primitives), Vaul (Drawer)
-- Axios (REST) + `fetch` для стриминга
-- ESLint + Prettier + Husky + lint-staged
+1. UI отправляет сообщение в `agent` на `POST /api/agui` (по умолчанию — SSE‑стрим).
+2. `agent` обрабатывает запрос, при необходимости вызывает MCP‑инструменты (по конфигу `agent/agui-agent-example.json`).
+3. Ответ стримится обратно в UI.
 
-## Быстрый старт
+## Технологии
 
-Рекомендуемый менеджер пакетов — `pnpm` (в репозитории есть `pnpm-lock.yaml`).
+- Frontend: React 19, TypeScript, Vite, React Router, TanStack Query, Zustand, Tailwind CSS + shadcn/ui.
+- Backend: Python 3.12+, FastAPI, Uvicorn, LangGraph/LangChain, MCP client.
+
+## Запуск (локально)
+
+### Предварительные требования
+
+- Node.js 18+ / 20+
+- Python 3.12+
+- `uv` (используется для установки зависимостей агента)
+- Docker (опционально, для `opensearch-service`)
+
+### Быстрый старт (UI + Agent)
 
 ```bash
-pnpm i
+npm i
 cp example.env .env
-pnpm dev
+npm run dev
 ```
 
-Dev‑сервер стартует на `http://localhost:3000` (см. `vite.config.ts`).
+- UI: `http://localhost:3000`
+- Agent API: `http://localhost:5001` (base: `http://localhost:5001/api`)
 
-### Мок‑режим (без бэкенда)
+Примечание: после `npm i` автоматически запускается `uv sync` в `agent/` (см. `scripts/setup-agent.*`). Если `uv` не установлен или автосетап упал, выполните вручную:
 
 ```bash
-pnpm dev:mock
+cd agent
+uv sync
 ```
 
-В этом режиме Vite подхватит `.env.mock`, а запросы истории/подсказок/MCP и стриминг ответа будут обслуживаться моками из `src/shared/api/mock`.
+### Мок‑режим (только UI, без бэкенда)
 
-## Переменные окружения (.env)
-
-Проект использует Vite‑переменные — нужен префикс `VITE_`.
-
-- `VITE_API_URL` — базовый URL REST API. Используется для:
-  - `GET /chat/prompts` — быстрые промпты
-  - `GET /chat/history` — история диалогов
-  - `GET /mcp/servers` — список MCP‑серверов
-  - `POST /mcp/servers/:id/state` — сохранить состояние сервера
-- `VITE_AGUI_URL` (опционально) — endpoint AG‑UI для стриминга ответа. Если не задан, используется `${VITE_API_URL}/agui`.
-- `VITE_API_MOCK` — `true/false`, включает моки (см. также `pnpm dev:mock`).
-
-### Как работать с `example.env`
-
-1. Скопируйте `example.env` в `.env`.
-2. При необходимости поменяйте `VITE_API_URL` (и/или `VITE_AGUI_URL`).
-3. Для локальной разработки без бэкенда используйте `pnpm dev:mock` или установите `VITE_API_MOCK=true`.
-
-> Файл `.env` игнорируется git’ом (см. `.gitignore`).
-
-## Архитектура и структура папок
-
-Структура близка к Feature-Sliced Design (FSD): `app / pages / widgets / features / entities / shared`.
-
-```
-public/                # статические файлы (лого и т.п.)
-src/
-  app/                 # инициализация приложения: роутер, провайдеры
-  pages/               # страницы (сейчас: ChatPage)
-  widgets/             # крупные UI-блоки (thread/toolbar/history)
-  features/            # пользовательские фичи (отправка, MCP, автокомплит)
-  entities/            # доменные сущности и сторы (chat, mcp, agent state)
-  shared/              # переиспользуемое: api, ui-kit, lib, hooks, components
+```bash
+npm run dev:mock
 ```
 
-Ключевые места:
+UI будет использовать `.env.mock` и моки из `src/shared/api/mock`.
 
-- `src/app/router.tsx` — маршрутизация (сейчас один маршрут `/`).
-- `src/app/providers/app-providers.tsx` — провайдеры (React Query, тема).
-- `src/shared/api/*` — клиенты API и стриминг AG‑UI.
-- `src/shared/api/mock/*` — моки для режима `VITE_API_MOCK=true`.
+## Конфигурация и переменные окружения
 
-## Скрипты
+### UI (`.env` / `example.env`)
 
-- `pnpm dev` — локальная разработка
-- `pnpm dev:mock` — разработка с мок‑данными
-- `pnpm build` — сборка в `dist/`
-- `pnpm preview` — предпросмотр сборки
-- `pnpm lint` — форматирование + eslint + typecheck
+Vite‑переменные (нужен префикс `VITE_`):
+
+- `VITE_API_URL` — base URL для API агента (например, `http://localhost:5001/api`).
+- `VITE_AGUI_URL` (опционально) — endpoint AG‑UI. По умолчанию `${VITE_API_URL}/agui`.
+- `VITE_API_MOCK` — `true/false`, включает мок‑режим на фронте.
+
+### Agent (`agent/`)
+
+- MCP/LLM конфиг: `agent/agui-agent-example.json`
+- `AGENT_DEBUG=true` — печатать traceback при ошибках.
+
+> Рекомендуемо хранить ключи доступа к LLM в переменных окружения и в `agent/agui-agent-example.json` указывать имя переменной (поле `llm.api_key_env`).
+
+### MCP серверы (`mcp_servers/`)
+
+- 1С OData MCP: `mcp_servers/mcp-1c-hack/.env.example`
+- OpenSearch RAG: `mcp_servers/opensearch-service/.env.example`
+
+## MCP серверы (опционально)
+
+### 1) 1С OData (`mcp_servers/mcp-1c-hack`)
+
+Поднимает MCP endpoint `http://localhost:8000/mcp` (transport: `streamable-http`).
+
+```bash
+cd mcp_servers/mcp-1c-hack
+cp .env.example .env
+python -m venv .venv
+python -m pip install -r requirements.txt
+python server.py
+```
+
+После запуска агент сможет вызывать инструменты `get_navigation_link`, `query_1c_data`, `list_odata_entities` (если они включены в UI).
+
+### 2) OpenSearch RAG (`mcp_servers/opensearch-service`)
+
+Запускает OpenSearch + контейнер `mcp-server` (MCP transport: `stdio`). Агент подключается через команду из `agent/agui-agent-example.json`:
+`docker exec -i mcp-server python /app/mcp_server.py`.
+
+```bash
+cd mcp_servers/opensearch-service
+cp .env.example .env
+docker compose up -d
+```
+
+## Архитектура (структура папок)
+
+```
+agent/                 # FastAPI агент (AG-UI) + MCP client
+mcp_servers/           # отдельные MCP сервера (1С OData, OpenSearch RAG)
+public/                # статические файлы фронта
+scripts/               # helper-скрипты (установка зависимостей агента)
+src/                   # фронтенд (FSD: app/pages/widgets/features/entities/shared)
+```
+
+## Скрипты (npm)
+
+- `npm run dev` — UI + Agent (concurrently)
+- `npm run dev:ui` — только UI
+- `npm run dev:agent` — только Agent (порт `5001`)
+- `npm run dev:mock` — UI в мок‑режиме
+- `npm run build` / `npm run preview` — сборка/предпросмотр UI
+- `npm run lint` — prettier + eslint + type-check

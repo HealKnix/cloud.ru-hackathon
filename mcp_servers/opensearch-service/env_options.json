@@ -1,0 +1,91 @@
+{
+  "rawEnvs": {
+    "OPENSEARCH_HOST": {
+      "isRequired": false,
+      "description": "Хост OpenSearch (по умолчанию: localhost)",
+      "defaultValue": "localhost"
+    },
+    "OPENSEARCH_PORT": {
+      "isRequired": false,
+      "description": "Порт OpenSearch (по умолчанию: 9200)",
+      "defaultValue": "9200"
+    },
+    "OPENSEARCH_USER": {
+      "isRequired": false,
+      "description": "Пользователь OpenSearch (если security включён)"
+    },
+    "OPENSEARCH_USE_SSL": {
+      "isRequired": false,
+      "description": "Использовать HTTPS для OpenSearch (true/false)",
+      "defaultValue": "false"
+    },
+    "OPENSEARCH_INDEX": {
+      "isRequired": false,
+      "description": "Индекс OpenSearch по умолчанию",
+      "defaultValue": "makar_cloud_semantic"
+    },
+    "OPENSEARCH_SEARCH_PIPELINE": {
+      "isRequired": false,
+      "description": "Search pipeline OpenSearch (опционально)"
+    },
+    "CLOUDRU_BASE_URL": {
+      "isRequired": false,
+      "description": "Base URL Cloud.ru Foundation Models API",
+      "defaultValue": "https://foundation-models.api.cloud.ru/v1"
+    },
+    "CLOUDRU_EMBEDDING_MODEL": {
+      "isRequired": false,
+      "description": "Модель embeddings Cloud.ru",
+      "defaultValue": "BAAI/bge-m3"
+    },
+    "CLOUDRU_CHAT_MODEL": {
+      "isRequired": false,
+      "description": "Модель chat-completions Cloud.ru",
+      "defaultValue": "zai-org/GLM-4.6"
+    },
+    "CLOUDRU_TEMPERATURE": {
+      "isRequired": false,
+      "description": "Температура для генерации (0..2)",
+      "defaultValue": "0.5"
+    },
+    "EMBEDDING_DIM": {
+      "isRequired": false,
+      "description": "Размерность embeddings для поля knn_vector в OpenSearch",
+      "defaultValue": "1024"
+    },
+    "SEMANTIC_SIM_THRESHOLD": {
+      "isRequired": false,
+      "description": "Порог сходства для семантического чанкинга",
+      "defaultValue": "0.8"
+    },
+    "MAX_SENT_PER_CHUNK": {
+      "isRequired": false,
+      "description": "Максимум предложений в чанке",
+      "defaultValue": "8"
+    },
+    "MCP_TRANSPORT": {
+      "isRequired": false,
+      "description": "Транспорт MCP: stdio или streamable-http",
+      "defaultValue": "stdio"
+    },
+    "PORT": {
+      "isRequired": false,
+      "description": "Порт для MCP при streamable-http",
+      "defaultValue": "8000"
+    }
+  },
+  "secretEnvs": {
+    "OPENSEARCH_PASSWORD": {
+      "isRequired": false,
+      "description": "Пароль OpenSearch (если security включён)"
+    },
+    "CLOUDRU_API_KEY": {
+      "isRequired": false,
+      "description": "API ключ Cloud.ru Foundation Models (предпочтительно)"
+    },
+    "API_KEY": {
+      "isRequired": false,
+      "description": "Альтернативный ключ Cloud.ru (если CLOUDRU_API_KEY не задан)"
+    }
+  }
+}

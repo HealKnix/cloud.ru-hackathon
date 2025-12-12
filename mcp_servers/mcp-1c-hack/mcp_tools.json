@@ -1,0 +1,75 @@
+[
+  {
+    "name": "get_navigation_link",
+    "description": "Находит объект конфигурации 1С по имени/синониму и возвращает e1c ссылку.",
+    "args": [
+      {
+        "name": "query",
+        "type": "string",
+        "description": "Имя/синоним объекта."
+      },
+      {
+        "name": "connection_string",
+        "type": "string",
+        "description": "IBConnectionString (если пусто — ONEC_CONNECTION_STRING)."
+      },
+      {
+        "name": "username",
+        "type": "string",
+        "description": "Пользователь 1С Designer (если пусто — ONEC_USERNAME)."
+      },
+      {
+        "name": "password",
+        "type": "string",
+        "description": "Пароль 1С Designer (если пусто — ONEC_PASSWORD)."
+      },
+      {
+        "name": "force_update",
+        "type": "boolean",
+        "description": "Принудительно пересоздать кеш метаданных."
+      }
+    ]
+  },
+  {
+    "name": "query_1c_data",
+    "description": "Строит OData план через Cloud.ru LLM и выполняет запрос к 1С OData.",
+    "args": [
+      {
+        "name": "user_query",
+        "type": "string",
+        "description": "Запрос пользователя на естественном языке."
+      },
+      {
+        "name": "connection_string",
+        "type": "string",
+        "description": "IBConnectionString для построения индекса (если пусто — ONEC_CONNECTION_STRING)."
+      },
+      {
+        "name": "username",
+        "type": "string",
+        "description": "Пользователь OData (если пусто — ODATA_1C_USER)."
+      },
+      {
+        "name": "password",
+        "type": "string",
+        "description": "Пароль OData (если пусто — ODATA_1C_PASSWORD)."
+      }
+    ]
+  },
+  {
+    "name": "list_odata_entities",
+    "description": "Возвращает список сущностей из OData ($metadata).",
+    "args": [
+      {
+        "name": "username",
+        "type": "string",
+        "description": "Пользователь OData (если пусто — ODATA_1C_USER)."
+      },
+      {
+        "name": "password",
+        "type": "string",
+        "description": "Пароль OData (если пусто — ODATA_1C_PASSWORD)."
+      }
+    ]
+  }
+]
